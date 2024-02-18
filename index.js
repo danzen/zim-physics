@@ -8,8 +8,7 @@
 // DESCRIPTION - coded in 2016 (c) ZIM
 // physics.js is an add-on ZIM module to help with Box2D
 // (17K) currently only providing a non-minified file - minify to save 10K
-// built for and requires Box2dWeb-2.1.a.3.min.js (220K)
-// available here: https://zimjs.org/cdn/2.1.3/box2d.js
+// built for and requires Box2dWeb
 
 // physics.js abstracts the world creation
 // makes border around the world
