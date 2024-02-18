@@ -1,0 +1,29 @@
+{
+  "name": "@zimjs/physics",
+  "version": "2.2.0",
+  "description": "Physics with Box2D for ZIM JavaScript Canvas Framework",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danzen/physics.git"
+  },
+  "keywords": [
+    "zimjs",
+    "zim",
+    "phsyics",
+    "box2D"
+  ],
+  "author": "Dr Abstract",
+  "license": "MIT",
+  "dependencies": {
+    "box2dweb": "^2.1.0-b"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "zimjs": "^15.0.0"
+  }
+}
