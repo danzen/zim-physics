@@ -28,6 +28,11 @@ import zim from "https://zimjs.org/cdn/016/zim_physics";
 <h2>NPM</h2>
 <p>This repository holds the NPM package so you can install from <a href=https://www.npmjs.com/package/@zimjs/physics target=node>@zimjs/physics</a> on NPM.  It includes typings and loads the Box2DWeb package as a dependency.  The <a href=https://www.npmjs.com/package/zimjs target=node>ZIM&nbsp;package</a> must be installed to work.</p>
 
+```JavaScript
+import zim from "zimjs"
+import { Physics } from "@zimjs/physics"
+```
+
 <h2>PHYSICS EXAMPLES</h2>
 
 <li><a href="https://zimjs.com/physics/" target="b">ZIM with Box2D - PHYSICS</a> - ZIM TEN Example</li>
