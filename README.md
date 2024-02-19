@@ -1,5 +1,5 @@
 
-<a href="https://zimjs.com/physics" target=_blank>![image](https://github.com/danzen/zim-physics/assets/380281/4f1edb8e-7463-4385-a14c-8785cbe27aa6)</a>
+<a href="https://zimjs.com/physics" target=_blank>![physics](https://github.com/danzen/zim-physics/assets/380281/0380b4a2-9bc2-417a-98b9-31d9aaf73be6)</a>
 
 <p>ZIM Phyics is a helper module for the ZIM JavaScript Canvas Framework that works with Box2DWeb.  
 In ZIM TEN we integrated physics - see https://zimjs.com/physics - so it is as easy as:</p>
@@ -25,7 +25,7 @@ import zim from "https://zimjs.org/cdn/016/zim_physics";
 ```
 
 <h2>NPM</h2>
-This repository holds the NPM package so you can install from @zimjs/physics on NPM.  It includes typings for Box2D and requires the NPM Box2DWeb and ZIM packages to be installed as well.
+This repository holds the NPM package so you can install from @zimjs/physics on NPM.  It includes typings and loads the Box2DWeb package as a dependency.  The ZIM package must be installed to work.
 
 <h2>SOME PHYSICS EXAMPLES</h2>
 
