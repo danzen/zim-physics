@@ -20,6 +20,7 @@ new Circle().center().addPhysics({bounciness:.7});
 <h2>CDN</h2>
 <p>Usually we use ES Modules to bring in ZIM and if we want Physics then we the code below - see the starting template at the top of the https://zimjs.com/code page.
 </p>
+
 ```JavaScript
 import zim from "https://zimjs.org/cdn/016/zim_physics";
 ```
