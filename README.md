@@ -18,14 +18,14 @@ new Circle().center().addPhysics({bounciness:.7});
 ```
 
 <h2>CDN</h2>
-Usually we use ES Modules to bring in ZIM and if we want Physics then we the code below - see the starting template at the top of the https://zimjs.com/code page.
-
+<p>Usually we use ES Modules to bring in ZIM and if we want Physics then we the code below - see the starting template at the top of the https://zimjs.com/code page.
+</p>
 ```JavaScript
 import zim from "https://zimjs.org/cdn/016/zim_physics";
 ```
 
 <h2>NPM</h2>
-This repository holds the NPM package so you can install from <a href=https://www.npmjs.com/package/@zimjs/physics target=node>@zimjs/physics</a> on NPM.  It includes typings and loads the Box2DWeb package as a dependency.  The <a href=https://www.npmjs.com/package/zimjs target=node>ZIM&nbsp;package</a> must be installed to work.
+<p>This repository holds the NPM package so you can install from <a href=https://www.npmjs.com/package/@zimjs/physics target=node>@zimjs/physics</a> on NPM.  It includes typings and loads the Box2DWeb package as a dependency.  The <a href=https://www.npmjs.com/package/zimjs target=node>ZIM&nbsp;package</a> must be installed to work.</p>
 
 <h2>PHYSICS EXAMPLES</h2>
 
@@ -63,4 +63,4 @@ CODE IN FIVE (See <a href="https://zimjs.com/five/" target="fm">https://zimjs.co
 
 
 <h2>ZIM</h2>
-See the ZIM repository at https://github.com/danzen/zimjs for information on ZIM and open source license, etc.
+<p>See the ZIM repository at https://github.com/danzen/zimjs for information on ZIM and open source license, etc.</p>
