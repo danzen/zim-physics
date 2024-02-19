@@ -1,7 +1,7 @@
 
 <a href="https://zimjs.com/physics" target=_blank>![physics](https://github.com/danzen/zim-physics/assets/380281/0380b4a2-9bc2-417a-98b9-31d9aaf73be6)</a>
 
-<p>ZIM Phyics is a helper module for the ZIM JavaScript Canvas Framework that works with Box2DWeb.  
+<p>ZIM Physics is a helper module for the ZIM JavaScript Canvas Framework that works with Box2DWeb.  
 In ZIM TEN we integrated physics - see https://zimjs.com/physics - so it is as easy as:</p>
 
 ```JavaScript
