@@ -7,7 +7,8 @@ import {Boundary, Frame, Point, DisplayObject } from "zimjs"
 declare namespace zim {
 
     export class Physics {
-        constructor(gravity?: number, borders?: Boundary | string, scroll?: boolean, frame?: Frame);
+        constructor(config_or_gravity?: number, borders?: Boundary | string, scroll?: boolean, frame?: Frame);
+        constructor(config:{gravity?: number, borders?: Boundary | string, scroll?: boolean, frame?: Frame});
         borders(boundary?:Boundary|string):this 
         drag(array?:[DisplayObject]):this 
         noDrag(array?:[DisplayObject]):this 
