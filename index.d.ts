@@ -2,7 +2,7 @@
 
 ///<reference types="./box2d.d.ts" />
 
-import {Boundary, Frame, Point, DisplayObject } from "zimjs"
+import { Boundary, Frame, Point, DisplayObject } from "zimjs"
 
 declare namespace zim {
 

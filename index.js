@@ -36,6 +36,7 @@ import Box2D from "box2dweb";
 
 
 var WW = window||{};
+var zon = WW.zon?WW.zon:true;
 	
 WW.b2Vec2 = Box2D.Common.Math.b2Vec2;
 WW.b2BodyDef = Box2D.Dynamics.b2BodyDef;
@@ -61,7 +62,7 @@ zim.Physics = function(gravity, borders, scroll, frame) {
 
     var that = this;
 
-    if (zim.zon) zog("ZIM PHYSICS");
+    if (zon) zog("ZIM PHYSICS");
 
     if (zot(frame)) {
         if (WW.zdf) frame = WW.zdf;
