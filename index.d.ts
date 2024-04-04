@@ -17,6 +17,7 @@ declare namespace zim {
         break(joint:Box2D.b2Joint):void 
         attach(control:DisplayObject, obj:DisplayObject):any
         unattach(id:any):void
+        buoyancy(height?:number, denisity?:number, linear?:number, angular?:number):any
         debug():this
         updateDebug():this
         removeDebug():this

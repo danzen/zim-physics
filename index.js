@@ -62,8 +62,6 @@ zim.Physics = function(gravity, borders, scroll, frame) {
 
     var that = this;
 
-    if (zon) zog("ZIM PHYSICS");
-
     if (zot(frame)) {
         if (WW.zdf) frame = WW.zdf;
         else if (WW.zimDefaultFrame) frame = WW.zimDefaultFrame;
@@ -225,6 +223,15 @@ zim.Physics = function(gravity, borders, scroll, frame) {
                 body.SetAngle(rotation*Math.PI/180);
             }
         });
+        body.loc = function(x,y) {
+            if (body.zimObj) {
+                x = x==null ? body.zimObj.x : x;
+                y = y==null ? body.zimObj.y : y;
+            }
+            body.SetPosition(new b2Vec2(x/scale, y/scale));
+            if (body.zimObj) body.zimObj.force(.01);
+            return body;
+        }
     }
 
     Object.defineProperty(this, 'gravity', {
@@ -500,6 +507,49 @@ zim.Physics = function(gravity, borders, scroll, frame) {
         }
     }
 
+    this.buoyancy = function(height, denisity, linear, angular) {
+        
+        if (zot(height)) height=that.frame.stage.height/2;
+        if (zot(denisity)) denisity = 3;
+        if (zot(linear)) linear = 4;
+        if (zot(angular)) angular = 4;
+
+        var bc = new b2BuoyancyController();
+        bc.normal.Set(0,-1);
+        bc.offset = -(H-height)/that.scale;
+        bc.density = denisity;
+        bc.linearDrag = linear;
+        bc.angularDrag = angular;
+
+        that.world.AddController(bc);
+        bc.add = function(obj) {
+            if (!Array.isArray(obj)) obj = [obj]
+            zim.loop(obj, function(o) {
+                if (o.body) o = o.body;
+                bc.AddBody(o);
+            });
+            return bc;
+        }
+        bc.remove = function(obj) {
+            if (!Array.isArray(obj)) obj = [obj]
+            zim.loop(obj, function(o) {
+                if (o.body) o = o.body;
+                bc.RemoveBody(o);
+            });
+            return bc;
+        }
+        bc.clear = function() {
+            bc.Clear();
+            return bc;
+        }
+        bc.dispose = function() {
+            bc.Clear();
+            that.world.RemoveController(bc);
+            bc = null;
+        }
+        return bc;
+    }		
+
     // Drag wraps the demo example mouse code
     var drag;
     this.dragList = [];
@@ -618,8 +668,8 @@ zim.Physics = function(gravity, borders, scroll, frame) {
         function getBodyCB(fixture) {
             if(fixture.GetBody().GetType() != b2Body.b2_staticBody) {
                 if(fixture.GetShape().TestPoint(fixture.GetBody().GetTransform(), mousePVec)) {
-                    selectedBody = fixture.GetBody();
-                    return false;
+                  selectedBody = fixture.GetBody();
+                  return false;
                 }
             }
             return true;
@@ -757,6 +807,7 @@ zim.Physics = function(gravity, borders, scroll, frame) {
     this.removeMap = function(box2DBody) {
         mappings.remove(box2DBody);
     }
+
 
     this.borders = function(rect) {
         if (zot(rect.x) || zot(rect.y) || zot(rect.width) || zot(rect.height)) return;
