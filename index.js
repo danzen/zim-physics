@@ -90,6 +90,7 @@ zim.Physics = function(gravity, borders, scroll, frame) {
     this.timeStep = 1/step;
     var isMouseDown = false;
 
+
     var world = this.world = new b2World(new b2Vec2(0, gravity), true); // gravity, allow sleep
     // each of these return a b2Body with x, y, and rotation properties added
 
@@ -132,6 +133,7 @@ zim.Physics = function(gravity, borders, scroll, frame) {
         definition.linearDamping = linear;
         var body = world.CreateBody(definition);
         var s;
+        var concave = false;
         if (type=="rectangle") {
             s = new b2PolygonShape();
             if (zot(shape[1])) shape[1] = 100;
@@ -167,25 +169,34 @@ zim.Physics = function(gravity, borders, scroll, frame) {
             for (var i=0; i<points.length; i++) {
                 points[i] = {x:points[i].x/scale, y:points[i].y/scale};
             }
+            body.points = points
             s.SetAsArray(points, points.length);
-            if (!s.Validate()) zogy("ZIM Physics - Poly must be convex");			
+            if (!s.Validate()) concave = true; //  zogy("ZIM Physics - Poly must be convex");			
         } else { // circle
             if (zot(shape[1])) shape[1] = 50;
             s = new b2CircleShape(shape[1]/scale);
             s.width = s.height = shape[1]*2;
         }
+        
         var fixture = new b2FixtureDef();
         if (!zot(categoryBits)) fixture.filter.categoryBits = categoryBits;
         if (!zot(maskBits)) fixture.filter.maskBits = maskBits;
-        fixture.shape = s;
         fixture.density = density;
         fixture.friction = friction;
         fixture.restitution = restitution;
         fixture.isSensor = sensor;
-        body.CreateFixture(fixture);
+
+        if (concave) {
+            that.separate(body, fixture, points);
+        } else {
+            fixture.shape = s;
+            body.CreateFixture(fixture);
+        }
+
         body.fixture = fixture;
         body.width = s.width;
         body.height = s.height;
+        
 
         // these hold x, y and rotation local values
         body.zimX = 0;
@@ -232,6 +243,10 @@ zim.Physics = function(gravity, borders, scroll, frame) {
             if (body.zimObj) body.zimObj.force(.01);
             return body;
         }
+        body.rot = function(a) {
+            body.rotation = a;
+            return body;
+        }
     }
 
     Object.defineProperty(this, 'gravity', {
@@ -242,6 +257,332 @@ zim.Physics = function(gravity, borders, scroll, frame) {
             this.world.SetGravity(new b2Vec2(0, val));
         }
     });
+
+    // START b2Separate CODE
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /*
+    * Convex Separator for Box2D Flash
+    *
+    * This class has been written by Antoan Angelov. 
+    * It is designed to work with Erin Catto's Box2D physics library.
+    *
+    * Everybody can use this software for any purpose, under two restrictions:
+    * 1. You cannot claim that you wrote this software.
+    * 2. You can not remove or alter this notice.
+    *
+    */
+
+    // Adapted for JS by https://github.com/isaksky - see Asteroids
+    // used internally by ZIM Physics for making a concave blob
+
+    this.separate = function(body, fixtureDef, verticesAry, scale) {
+        scale = scale != null ? scale : 30;
+        var i, n = verticesAry.length,
+            j, m;
+        var vec = [],
+            figsAry;
+        var polyShape;
+
+        for (i = 0; i < n; i++) {
+            vec.push(new b2Vec2(verticesAry[i].x * scale, verticesAry[i].y * scale));
+        }
+
+        figsAry = calcShapes(vec);
+        n = figsAry.length;
+
+        for (i = 0; i < n; i++) {
+            verticesAry = [];
+            vec = figsAry[i];
+            m = vec.length;
+            for (j = 0; j < m; j++) {
+                verticesAry.push(new b2Vec2(vec[j].x / scale, vec[j].y / scale));
+            }
+
+            polyShape = new b2PolygonShape;
+            polyShape.SetAsVector(verticesAry);
+            fixtureDef.shape = polyShape;
+            body.CreateFixture(fixtureDef);
+        }
+    };
+
+    this.validate = function(obj) {
+        // pass in Blob or an array of points
+        // 0 if the vertices can be properly processed
+        // 1 If there are overlapping lines
+        // 2 if the points are not in clockwise order
+        // 3 if there are overlapping lines and the points are not in clockwise order
+        var verticesAry = obj;
+        if (obj.type == "Blob") {
+            var points = obj.points;
+            verticesAry = [];
+            for (var i=0; i<points.length; i++) {
+                verticesAry[i] = {x:points[i][0]/that.scale, y:points[i][1]/that.scale};
+            }
+        }
+        var i, n = verticesAry.length,
+            j, j2, i2, i3, d, ret = 0;
+        var fl, fl2 = false;
+
+        for (i = 0; i < n; i++) {
+            i2 = (i < n - 1) ? i + 1 : 0;
+            i3 = (i > 0) ? i - 1 : n - 1;
+
+            fl = false;
+            for (j = 0; j < n; j++) {
+                if (((j != i) && j != i2)) {
+                    if (!fl) {
+                        d = det(verticesAry[i].x, verticesAry[i].y, verticesAry[i2].x, verticesAry[i2].y, verticesAry[j].x, verticesAry[j].y);
+                        if ((d > 0)) {
+                            fl = true;
+                        }
+                    }
+
+                    if ((j != i3)) {
+                        j2 = (j < n - 1) ? j + 1 : 0;
+                        if (hitSegment(verticesAry[i].x, verticesAry[i].y, verticesAry[i2].x, verticesAry[i2].y, verticesAry[j].x, verticesAry[j].y, verticesAry[j2].x, verticesAry[j2].y)) {
+                            ret = 1;
+                        }
+                    }
+                }
+            }
+
+            if (!fl) {
+                fl2 = true;
+            }
+        }
+
+        if (fl2) {
+            if ((ret == 1)) {
+                ret = 3;
+            } else {
+                ret = 2;
+            }
+
+        }
+        return ret;
+    };
+
+    var calcShapes = function(verticesAry) {
+        var vec;
+        var i, n, j;
+        var d, t, dx, dy, minLen;
+        var i1, i2, i3, p1, p2, p3;
+        var j1, j2, v1, v2, k, h;
+        var vec1, vec2;
+        var v, hitV;
+        var isConvex;
+        var figsAry = [],
+            queue = [];
+
+        queue.push(verticesAry);
+
+        while (queue.length) {
+            vec = queue[0];
+            n = vec.length;
+            isConvex = true;
+
+            for (i = 0; i < n; i++) {
+                i1 = i;
+                i2 = (i < n - 1) ? i + 1 : i + 1 - n;
+                i3 = (i < n - 2) ? i + 2 : i + 2 - n;
+
+                p1 = vec[i1];
+                p2 = vec[i2];
+                p3 = vec[i3];
+
+                d = det(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
+                if ((d < 0)) {
+                    isConvex = false;
+                    minLen = Number.MAX_VALUE;
+
+                    for (j = 0; j < n; j++) {
+                        if (((j != i1) && j != i2)) {
+                            j1 = j;
+                            j2 = (j < n - 1) ? j + 1 : 0;
+
+                            v1 = vec[j1];
+                            v2 = vec[j2];
+
+                            v = hitRay(p1.x, p1.y, p2.x, p2.y, v1.x, v1.y, v2.x, v2.y);
+
+                            if (v) {
+                                dx = p2.x - v.x;
+                                dy = p2.y - v.y;
+                                t = dx * dx + dy * dy;
+
+                                if ((t < minLen)) {
+                                    h = j1;
+                                    k = j2;
+                                    hitV = v;
+                                    minLen = t;
+                                }
+                            }
+                        }
+                    }
+
+                    if ((minLen == Number.MAX_VALUE)) {
+                        err();
+                    }
+
+                    vec1 = [];
+                    vec2 = [];
+
+                    j1 = h;
+                    j2 = k;
+                    v1 = vec[j1];
+                    v2 = vec[j2];
+
+                    if (!pointsMatch(hitV.x, hitV.y, v2.x, v2.y)) {
+                        vec1.push(hitV);
+                    }
+                    if (!pointsMatch(hitV.x, hitV.y, v1.x, v1.y)) {
+                        vec2.push(hitV);
+                    }
+
+                    h = -1;
+                    k = i1;
+                    while (true) {
+                        if ((k != j2)) {
+                            vec1.push(vec[k]);
+                        } else {
+                            if (((h < 0) || h >= n)) {
+                                err();
+                            }
+                            if (!isOnSegment(v2.x, v2.y, vec[h].x, vec[h].y, p1.x, p1.y)) {
+                                vec1.push(vec[k]);
+                            }
+                            break;
+                        }
+
+                        h = k;
+                        if (((k - 1) < 0)) {
+                            k = n - 1;
+                        } else {
+                            k--;
+                        }
+                    }
+
+                    vec1 = vec1.reverse();
+
+                    h = -1;
+                    k = i2;
+                    while (true) {
+                        if ((k != j1)) {
+                            vec2.push(vec[k]);
+                        } else {
+                            if (((h < 0) || h >= n)) {
+                                err();
+                            }
+                            if (((k == j1) && !isOnSegment(v1.x, v1.y, vec[h].x, vec[h].y, p2.x, p2.y))) {
+                                vec2.push(vec[k]);
+                            }
+                            break;
+                        }
+
+                        h = k;
+                        if (((k + 1) > n - 1)) {
+                            k = 0;
+                        } else {
+                            k++;
+                        }
+                    }
+
+                    queue.push(vec1, vec2);
+                    queue.shift();
+
+                    break;
+                }
+            }
+
+            if (isConvex) {
+                figsAry.push(queue.shift());
+            }
+        }
+
+        return figsAry;
+    };
+
+    var hitRay = function(x1, y1, x2, y2, x3, y3, x4, y4) {
+        var t1 = x3 - x1,
+            t2 = y3 - y1,
+            t3 = x2 - x1,
+            t4 = y2 - y1,
+            t5 = x4 - x3,
+            t6 = y4 - y3,
+            t7 = t4 * t5 - t3 * t6,
+            a;
+
+        a = (((t5 * t2) - t6 * t1) / t7);
+        var px = x1 + a * t3,
+            py = y1 + a * t4;
+        var b1 = isOnSegment(x2, y2, x1, y1, px, py);
+        var b2 = isOnSegment(px, py, x3, y3, x4, y4);
+
+        if ((b1 && b2)) {
+            return new b2Vec2(px, py);
+        }
+
+        return null;
+    };
+
+    var hitSegment = function(x1, y1, x2, y2, x3, y3, x4, y4) {
+        var t1 = x3 - x1,
+            t2 = y3 - y1,
+            t3 = x2 - x1,
+            t4 = y2 - y1,
+            t5 = x4 - x3,
+            t6 = y4 - y3,
+            t7 = t4 * t5 - t3 * t6,
+            a;
+
+        a = (((t5 * t2) - t6 * t1) / t7);
+        var px = x1 + a * t3,
+            py = y1 + a * t4;
+        var b1 = isOnSegment(px, py, x1, y1, x2, y2);
+        var b2 = isOnSegment(px, py, x3, y3, x4, y4);
+
+        if ((b1 && b2)) {
+            return new b2Vec2(px, py);
+        }
+
+        return null;
+    };
+
+    var isOnSegment = function(px, py, x1, y1, x2, y2) {
+        var b1 = ((((x1 + 0.1) >= px) && px >= x2 - 0.1) || (((x1 - 0.1) <= px) && px <= x2 + 0.1));
+        var b2 = ((((y1 + 0.1) >= py) && py >= y2 - 0.1) || (((y1 - 0.1) <= py) && py <= y2 + 0.1));
+        return ((b1 && b2) && isOnLine(px, py, x1, y1, x2, y2));
+    };
+
+    var pointsMatch = function(x1, y1, x2, y2) {
+        var dx = (x2 >= x1) ? x2 - x1 : x1 - x2,
+            dy = (y2 >= y1) ? y2 - y1 : y1 - y2;
+        return ((dx < 0.1) && dy < 0.1);
+    };
+
+    var isOnLine = function(px, py, x1, y1, x2, y2) {
+        if ((((x2 - x1) > 0.1) || x1 - x2 > 0.1)) {
+            var a = (y2 - y1) / (x2 - x1),
+                possibleY = a * (px - x1) + y1,
+                diff = (possibleY > py) ? possibleY - py : py - possibleY;
+            return (diff < 0.1);
+        }
+
+        return (((px - x1) < 0.1) || x1 - px < 0.1);
+    };
+
+    var det = function det(x1, y1, x2, y2, x3, y3) {
+        return x1 * y2 + x2 * y3 + x3 * y1 - y1 * x2 - y2 * x3 - y3 * x1;
+    };
+
+    var err = function err() {
+        throw new Error("A problem has occurred. Use physics.validate(blob) to see where the problem is.");
+    };
+
+    // END b2Separate CODE
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        
 
     this.join = function(obj1, obj2, point1, point2, minAngle, maxAngle, type, body1, body2) {
         var duo; if (duo = zob(that.join, arguments)) return duo;
@@ -527,6 +868,7 @@ zim.Physics = function(gravity, borders, scroll, frame) {
             zim.loop(obj, function(o) {
                 if (o.body) o = o.body;
                 bc.AddBody(o);
+                if (o.zimObj) o.zimObj.impulse(0,.1);
             });
             return bc;
         }
@@ -534,7 +876,10 @@ zim.Physics = function(gravity, borders, scroll, frame) {
             if (!Array.isArray(obj)) obj = [obj]
             zim.loop(obj, function(o) {
                 if (o.body) o = o.body;
-                bc.RemoveBody(o);
+                try {
+                    bc.RemoveBody(o);
+                    if (o.zimObj) o.zimObj.impulse(0,.1);
+                } catch (e) {}
             });
             return bc;
         }
@@ -668,8 +1013,8 @@ zim.Physics = function(gravity, borders, scroll, frame) {
         function getBodyCB(fixture) {
             if(fixture.GetBody().GetType() != b2Body.b2_staticBody) {
                 if(fixture.GetShape().TestPoint(fixture.GetBody().GetTransform(), mousePVec)) {
-                  selectedBody = fixture.GetBody();
-                  return false;
+                    selectedBody = fixture.GetBody();
+                    return false;
                 }
             }
             return true;
