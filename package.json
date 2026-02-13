@@ -1,6 +1,6 @@
 {
     "name": "@zimjs/physics",
-    "version": "2.3.1",
+    "version": "2.3.2",
     "description": "Physics with Box2D for ZIM JavaScript Canvas Framework",
     "main": "index.js",
     "types": "index.d.ts",

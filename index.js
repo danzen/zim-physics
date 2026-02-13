@@ -1059,7 +1059,7 @@ zim.Physics = function(gravity, borders, scroll, frame) {
                 if(typeof(elem.offsetParent) == "object") elem = elem.offsetParent;
             }
         }
-        return {x:x-zim.scrollX(), y:y-zim.scrollY()};
+        return {x:x-(zim.scrollX?zim.scrollX():zim.browserScrollX()), y:y-(zim.scrollY?zim.scrollY():zim.browserScrollY())};
     }
 
     
