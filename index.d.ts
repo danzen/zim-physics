@@ -10,8 +10,8 @@ declare namespace zim {
         constructor(config_or_gravity?: number, borders?: Boundary | string, scroll?: boolean, frame?: Frame);
         constructor(config:{gravity?: number, borders?: Boundary | string, scroll?: boolean, frame?: Frame});
         borders(boundary?:Boundary|string):this 
-        drag(array?:[DisplayObject]):this 
-        noDrag(array?:[DisplayObject]):this 
+        drag(array?:DisplayObject[]):this 
+        noDrag(array?:DisplayObject[]):this 
         pause(type?:boolean):this  
         join(obj1:DisplayObject, obj2:DisplayObject, point1?:Point, point2?:Point, minAngle?:number, maxAngle?:number, type?:string):Box2D.b2Joint  
         break(joint:Box2D.b2Joint):void 
